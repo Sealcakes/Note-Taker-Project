@@ -8,9 +8,14 @@ const uniqid = require('uniqid');
 notes.get('/', (req,res) => {
     console.info(`${req.method} request received for notes`);
 
-    let data = fs.readFileSync('./db/db.json', 'utf8');
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+        } else {
+            res.json(JSON.parse(data));
+        }
+    });
 
-    res.json(JSON.parse(data));
 });
 
 notes.post('/', (req,res) => {
@@ -25,39 +30,46 @@ notes.post('/', (req,res) => {
     };  
     
 
-    let data = fs.readFileSync('./db/db.json', 'utf-8');
-
-    const parsedData = JSON.parse(data);
-
-    parsedData.push(newNote);
-
-    fs.writeFile('./db/db.json', JSON.stringify(parsedData), (err, text) => {
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
         if (err) {
-            console.error(err)
-            return;
+            console.error(err);
+        } else {
+            const parsedData = JSON.parse(data);
+            parsedData.push(newNote);
+            fs.writeFile('./db/db.json', JSON.stringify(parsedData), (err, text) => {
+                if (err) {
+                    console.error(err)
+                    return;
+                }
+                console.log('Test', text);
+            })
         }
-        console.log('Test', text);
     })
+    
+
+    
 
     res.json(data);
 });
 
 notes.delete('/:id', (req, res) => {
     const noteToDelete = req.params.id;
-    console.log(noteToDelete);
-    // readFileAsync('./db/db.json', 'utf-8').then((data) => {
-    //     const note = [].concat(JSON.parse(data));
-    //     const newNotesData = [];
-    //     for (let i = 0; i < note.length; i++) {
-    //         if (noteToDelete !== note[i].id) {
-    //             newNotesData.push(note[i])
-    //         }
-    //     }
-    //     return newNotesData
-    // }).then((note) => {
-    //     writeFileAsync('./db/db.json', JSON.stringify(note))
-    //     res.send('Note saved successfully');
-    // })
+    console.log(typeof noteToDelete);
+
+    function deleteNote(id) {
+        if (id === noteToDelete) {
+            return false;
+        } 
+    }
+
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        const newNotes = data.filter(deleteNote);
+        return newNotes;
+      }
+    })
 });
 
 module.exports = notes;
