@@ -39,35 +39,32 @@ notes.post('/', (req,res) => {
             fs.writeFile('./db/db.json', JSON.stringify(parsedData), (err, text) => {
                 if (err) {
                     console.error(err)
-                    return;
                 }
-                console.log('Test', text);
+                
             })
+            res.json(JSON.parse(data));
         }
     })
     
 
     
 
-    res.json(data);
+    
 });
 
 notes.delete('/:id', (req, res) => {
     const noteToDelete = req.params.id;
-    console.log(typeof noteToDelete);
-
-    function deleteNote(id) {
-        if (id === noteToDelete) {
-            return false;
-        } 
-    }
+    console.log(noteToDelete);
 
     fs.readFile('./db/db.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
       } else {
-        const newNotes = data.filter(deleteNote);
-        return newNotes;
+        const parsedData = JSON.parse(data);
+        let result = parsedData.filter(obj => {
+            return obj.id === noteToDelete;
+        })
+        console.log(result);
       }
     })
 });
