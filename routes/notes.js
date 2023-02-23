@@ -54,17 +54,27 @@ notes.post('/', (req,res) => {
 
 notes.delete('/:id', (req, res) => {
     const noteToDelete = req.params.id;
-    console.log(noteToDelete);
 
     fs.readFile('./db/db.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
       } else {
         const parsedData = JSON.parse(data);
-        let result = parsedData.filter(obj => {
+        let result = parsedData.find(obj => {
             return obj.id === noteToDelete;
         })
+        const noteIndex = parsedData.indexOf(result);
+        console.log(noteIndex);
         console.log(result);
+        if (noteIndex > -1) {
+            parsedData.splice(noteIndex, 1);
+        }
+        fs.writeFile('./db/db.json', JSON.stringify(parsedData), (err) => {
+            if (err) {
+                console.error(err)
+            }
+        })
+        res.json(JSON.parse(data));
       }
     })
 });
